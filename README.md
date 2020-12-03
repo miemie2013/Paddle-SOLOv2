@@ -2,7 +2,7 @@
 
 ## 概述
 
-前前往AIStudio体验：[实时实例分割SOLOv2来了！](https://aistudio.baidu.com/aistudio/projectdetail/1266474)
+请前往AIStudio体验：[实时实例分割SOLOv2来了！](https://aistudio.baidu.com/aistudio/projectdetail/1266474)
 
 我之前自己使用PaddleDetection写过一版SOLOv2 [实时实例分割SOLOv2来了！](https://aistudio.baidu.com/aistudio/projectdetail/985880)  ，奈何无法复现论文中训练成果。几天前发现PaddleDetection已经发布了复现的SOLOv2模型。恰巧飞桨也发布了2.0版本，主推动态图。故炒此冷饭，也算是自己给SOLOv2算法的学习画个句号。
 
@@ -123,6 +123,9 @@ GitHub: [miemie2013](https://github.com/miemie2013)
 
 
 ## 传送门
+
+咩酱重写过很多算法，比如PPYOLO、SOLOv2、FCOS、YOLOv4等，而且在多个深度学习框架（tensorflow、pytorch、paddlepaddle等）上都实现了一遍，你可以进我的GitHub主页看看，看到喜欢的仓库可以点个star呀！
+
 cv算法交流q群：645796480
 但是关于仓库的疑问尽量在Issues上提，避免重复解答。
 
