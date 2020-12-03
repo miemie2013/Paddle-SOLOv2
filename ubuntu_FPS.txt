@@ -1,0 +1,78 @@
+
+
+ubuntu测速
+
+
+
+
+Pytorch-PPYOLO
+| 算法 | 骨干网络 | 图片输入大小 | mAP(COCO val2017) | mAP(COCO test2017) | FPS  |
+|:------------:|:--------:|:----:|:-------:|:-------:|:---------:|
+| PPYOLO    | ResNet50-vd | (608,608)  | 0.448  | 0.451  | 16.6 |
+| PPYOLO    | ResNet50-vd | (320,320)  | 0.389  | -  | 34.1 |
+| PPYOLO_r18vd    | ResNet18-vd | (608,608)  | 0.286  | -  | 51.7 |
+| PPYOLO_r18vd    | ResNet18-vd | (416,416)  | 0.286  | -  | 76.2 |
+| PPYOLO_r18vd    | ResNet18-vd | (320,320)  | 0.262  | -  | 93.3 |
+
+
+
+
+
+=============== Paddle静态图 ==================
+Paddle-YOLOv4
+中的yolov3导出后的速度应该与ppyolo差不多。
+yolov3 15.1FPS  （导出后608x608的速度。可能因为没有多线程异步读取图片）
+yolov3 30.5FPS  （导出后320x320的速度。可能因为没有多线程异步读取图片）
+
+
+
+
+PaddleDetection-SOLOv2
+测一下实例分割算法的速度。
+SOLOv2_LIGHT_448_R50_3x   8.1FPS    （导出后的速度。可能因为没有多线程异步读取图片）
+SOLOv2_R50_3x             4.2FPS    （导出后的速度。可能因为没有多线程异步读取图片）
+
+
+=============== Paddle动态图 ==================
+Paddle-PPYOLO2
+动态图版ppyolo的速度。如果慢就尝试导出。
+ppyolo 15.6FPS  （动态图608x608的速度。已经和静态图导出后的速度一样）
+ppyolo 23.7FPS  （动态图320x320的速度。慢于静态图导出后的速度）
+ppyolo_r18 52.8FPS  （动态图608x608的速度。已经和Pytorch-PPYOLO的速度一样）
+ppyolo_r18 77.8FPS  （动态图416x416的速度。已经和Pytorch-PPYOLO的速度一样）
+ppyolo_r18 86.1FPS  （动态图320x320的速度。已经和Pytorch-PPYOLO的速度一样）
+
+
+
+Paddle-PPYOLOMASK2
+动态图版PPYOLOMASK的速度。如果慢就尝试导出。
+ppyolo 5.1FPS  （动态图608x608的速度。）
+ppyolo 5.9FPS  （动态图320x320的速度。）
+
+
+
+Paddle-SOLOv22
+动态图版SOLOv2的速度。如果慢就尝试导出。
+SOLOv2_LIGHT_448_R50_3x   8.5FPS
+SOLOv2_R50_3x             4.6FPS
+solov2_light_r50_vd_fpn_dcn_512_3x      7.6FPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
