@@ -1,0 +1,163 @@
+
+
+---------------------------- 1 ----------------------------
+solov2_light_r50_vd_fpn_dcn_512_3x:
+batch_size=12
+freeze_at=0
+use_ema = True
+
+
+本仓库训练速度：
+2020-12-04 11:44:20,089-INFO: Train iter: 20, lr: 0.000200000, all_loss: 3.760885, loss_ins: 2.685804, loss_cate: 1.075081, eta: 5 days, 5:23:49
+2020-12-04 12:11:44,578-INFO: Train iter: 1000, lr: 0.010000000, all_loss: 1.828810, loss_ins: 1.280802, loss_cate: 0.548009, eta: 5 days, 7:12:46
+
+980step / (40+15*60+11*60+44)s = 980step / 1644s = 0.5961 step/s
+
+
+
+PaddleDetection里的相同配置下的速度：
+2020-12-04 13:22:53,014-INFO: iter: 20, lr: 0.000200, 'loss_ins': '2.592217', 'loss_cate': '1.082973', 'loss': '3.650249', eta: 4 days, 11:00:21, batch_cost: 1.42685 sec, ips: 8.41013 images/sec
+2020-12-04 13:43:40,165-INFO: iter: 1000, lr: 0.010000, 'loss_ins': '1.085544', 'loss_cate': '0.452808', 'loss': '1.559029', eta: 4 days, 1:49:49, batch_cost: 1.30925 sec, ips: 9.16553 images/sec
+
+980step / (7+20*60+40)s = 980step / 1247s = 0.7859 step/s
+
+所以 本仓库训练速度 约为 PaddleDetection 的 5961/7859 = 75.85%
+
+
+
+
+
+---------------------------- 2 ----------------------------
+solov2_light_r50_vd_fpn_dcn_512_3x:
+batch_size=12
+freeze_at=0
+use_ema = False
+
+
+本仓库训练速度：
+2020-12-04 12:43:50,121-INFO: Train iter: 20, lr: 0.000200000, all_loss: 3.614500, loss_ins: 2.506620, loss_cate: 1.107880, eta: 4 days, 13:08:20
+2020-12-04 13:07:47,047-INFO: Train iter: 1000, lr: 0.010000000, all_loss: 1.484605, loss_ins: 0.973509, loss_cate: 0.511096, eta: 4 days, 16:13:38
+
+980step / (10+16*60+7*60+47)s = 980step / 1437s = 0.6820 step/s
+
+
+
+PaddleDetection里的相同配置下的速度：
+2020-12-04 12:56:00,494-INFO: iter: 20, lr: 0.000200, 'loss_ins': '2.452419', 'loss_cate': '1.082184', 'loss': '3.542081', eta: 4 days, 11:33:08, batch_cost: 1.43414 sec, ips: 8.36740 images/sec
+2020-12-04 13:16:26,116-INFO: iter: 1000, lr: 0.010000, 'loss_ins': '1.137554', 'loss_cate': '0.509825', 'loss': '1.637643', eta: 3 days, 23:13:01, batch_cost: 1.27428 sec, ips: 9.41707 images/sec
+
+980step / (4*60+16*60+26)s = 980step / 1226s = 0.7993 step/s
+
+所以 本仓库训练速度 约为 PaddleDetection 的 6820/7993 = 85.32%。由此可见EMA在动态图中的实现并不高效。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PaddleDetection只训练20000步：
+
+2020-12-04 22:03:53,315-INFO: Test finish iter 5000
+2020-12-04 22:03:53,315-INFO: Total iteration: 5000, inference time: 6.46526465264554 batch/s.
+loading annotations into memory...
+Done (t=7.37s)
+creating index...
+index created!
+2020-12-04 22:04:08,306-INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=14.57s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *segm*
+DONE (t=73.04s).
+Accumulating evaluation results...
+DONE (t=8.08s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.275
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.468
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.283
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.287
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.483
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.257
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.387
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.408
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.152
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.460
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.657
+2020-12-04 22:05:46,739-INFO: Save model to output/solov2_light_r50_vd_fpn_dcn_512_3x/best_model.
+2020-12-04 22:05:51,340-INFO: Best test box ap: 0.27520791997286925, in iter: 20000
+2020-12-04 22:06:17,474-INFO: iter: 20020, lr: 0.010000, 'loss_ins': '0.561234', 'loss_cate': '0.259458', 'loss': '0.819728', eta: 133 days, 10:07:45, batch_cost: 46.11435 sec, ips: 0.26022 images/sec
+2020-12-04 22:06:42,977-INFO: iter: 20040, lr: 0.010000, 'loss_ins': '0.583528', 'loss_cate': '0.265072', 'loss': '0.860012', eta: 3 days, 17:28:33, batch_cost: 1.28866 sec, ips: 9.31198 images/sec
+2020-12-04 22:07:08,085-INFO: iter: 20060, lr: 0.010000, 'loss_ins': '0.632120', 'loss_cate': '0.271550', 'loss': '0.900377', eta: 3 days, 15:15:23, batch_cost: 1.25679 sec, ips: 9.54810 images/sec
+
+
+本仓库只训练20000步：
+2020-12-04 23:32:48,785-INFO: Test iter 4900
+2020-12-04 23:33:00,302-INFO: Test Done.
+2020-12-04 23:33:00,303-INFO: total time: 1018.726801s
+2020-12-04 23:33:00,303-INFO: Speed: 0.205720s per image,  4.9 FPS.
+loading annotations into memory...
+Done (t=1.04s)
+creating index...
+index created!
+2020-12-04 23:33:01,405-INFO: Generating json file...
+2020-12-04 23:33:07,932-INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=4.15s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=49.86s).
+Accumulating evaluation results...
+DONE (t=8.03s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.242
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.409
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.240
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.265
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.377
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.248
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.392
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.423
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.160
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.463
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.679
+loading annotations into memory...
+Done (t=0.45s)
+creating index...
+index created!
+2020-12-04 23:34:12,562-INFO: Generating json file...
+2020-12-04 23:34:22,087-INFO: Start evaluate...
+Loading and preparing results...
+DONE (t=8.94s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *segm*
+DONE (t=59.13s).
+Accumulating evaluation results...
+DONE (t=7.45s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.239
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.422
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.238
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.053
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.245
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.421
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.235
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.357
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.377
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.129
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.421
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.619
+
+
