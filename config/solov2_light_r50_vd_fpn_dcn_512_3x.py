@@ -13,16 +13,22 @@
 class SOLOv2_light_r50_vd_fpn_dcn_512_3x_Config(object):
     def __init__(self):
         # 自定义数据集
+        self.train_path = 'annotation_json/voc2012_train.json'
+        self.val_path = 'annotation_json/voc2012_val.json'
+        self.classes_path = 'data/voc_classes.txt'
+        self.train_pre_path = '../data/data4379/pascalvoc/VOCdevkit/VOC2012/JPEGImages/'   # 训练集图片相对路径
+        self.val_pre_path = '../data/data4379/pascalvoc/VOCdevkit/VOC2012/JPEGImages/'     # 验证集图片相对路径
+        self.num_classes = 20                              # 数据集类别数
 
         # AIStudio下的COCO数据集
-        self.train_path = '../data/data7122/annotations/instances_train2017.json'
-        self.val_path = '../data/data7122/annotations/instances_val2017.json'
-        self.classes_path = 'data/coco_classes.txt'
-        self.train_pre_path = '../data/data7122/train2017/'  # 训练集图片相对路径
-        self.val_pre_path = '../data/data7122/val2017/'      # 验证集图片相对路径
-        self.test_path = '../data/data7122/annotations/image_info_test-dev2017.json'      # test集
-        self.test_pre_path = '../data/data7122/test2017/'    # test集图片相对路径
-        self.num_classes = 80                                # 数据集类别数
+        # self.train_path = '../data/data7122/annotations/instances_train2017.json'
+        # self.val_path = '../data/data7122/annotations/instances_val2017.json'
+        # self.classes_path = 'data/coco_classes.txt'
+        # self.train_pre_path = '../data/data7122/train2017/'  # 训练集图片相对路径
+        # self.val_pre_path = '../data/data7122/val2017/'      # 验证集图片相对路径
+        # self.test_path = '../data/data7122/annotations/image_info_test-dev2017.json'      # test集
+        # self.test_pre_path = '../data/data7122/test2017/'    # test集图片相对路径
+        # self.num_classes = 80                                # 数据集类别数
 
         # Windows下的COCO数据集
         # self.train_path = '../COCO/annotations/instances_train2017.json'
@@ -82,8 +88,8 @@ class SOLOv2_light_r50_vd_fpn_dcn_512_3x_Config(object):
 
         # 测试。用于demo.py
         self.test_cfg = dict(
-            model_path='dygraph_solov2_light_r50_vd_fpn_dcn_512_3x.pdparams',
-            # model_path='./weights/1000.pdparams',
+            # model_path='dygraph_solov2_light_r50_vd_fpn_dcn_512_3x.pdparams',
+            model_path='./weights/26000.pdparams',
             target_size=512,
             # target_size=320,
             draw_image=True,
