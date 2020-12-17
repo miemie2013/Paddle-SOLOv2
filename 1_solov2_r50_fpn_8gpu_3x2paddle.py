@@ -27,6 +27,9 @@ place = paddle.CUDAPlace(gpu_id) if use_gpu else paddle.CPUPlace()
 
 
 cfg = SOLOv2_r50_fpn_8gpu_3x_Config()
+# 该模型是COCO数据集上训练好的，所以强制改类别数为80
+cfg.num_classes = 80
+cfg.head['num_classes'] = cfg.num_classes + 1
 
 
 

@@ -136,6 +136,18 @@ def get_norm(norm_type):
 
 
 
+class Mish(paddle.nn.Layer):
+    def __init__(self):
+        super(Mish, self).__init__()
+
+    def _softplus(self, x):
+        expf = fluid.layers.exp(fluid.layers.clip(x, -200, 50))
+        return fluid.layers.log(1 + expf)
+
+    def __call__(self, x):
+        return x * fluid.layers.tanh(self._softplus(x))
+
+
 class Conv2dUnit(paddle.nn.Layer):
     def __init__(self,
                  input_dim,
@@ -255,6 +267,12 @@ class Conv2dUnit(paddle.nn.Layer):
             self.act = paddle.nn.ReLU()
         elif act == 'leaky':
             self.act = paddle.nn.LeakyReLU(0.1)
+        elif act == 'mish':
+            self.act = Mish()
+        elif act is None:
+            pass
+        else:
+            raise NotImplementedError("Activation \'{}\' is not implemented.".format(act))
 
 
     def freeze(self):

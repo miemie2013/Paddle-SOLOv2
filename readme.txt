@@ -86,6 +86,14 @@ cd ~/w*
 
 
 -------------------------------- SOLOv2 --------------------------------
+parser.add_argument('-c', '--config', type=int, default=2,
+                    choices=[0, 1, 2],
+                    help=textwrap.dedent('''\
+                    select one of these config files:
+                    0 -- solov2_r50_fpn_8gpu_3x.py
+                    1 -- solov2_light_448_r50_fpn_8gpu_3x.py
+                    2 -- solov2_light_r50_vd_fpn_dcn_512_3x.py'''))
+
 训练
 cd ~/w*
 python train.py --config=0

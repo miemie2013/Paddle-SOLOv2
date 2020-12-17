@@ -59,6 +59,25 @@
 --config=2表示的是使用配置文件solov2_light_r50_vd_fpn_dcn_512_3x.py；--config=1表示的是使用配置文件solov2_light_448_r50_fpn_8gpu_3x.py；--config=0表示的是使用配置文件solov2_r50_fpn_8gpu_3x.py；读者可以按需调整。train.py、eval.py、test_dev.py中也同理，读者可以按需调整。
 
 
+## 数据集的放置位置
+如果不是在AIStudio上训练，而是在个人电脑上训练，数据集应该和本项目位于同一级目录(同时需要修改一下配置文件中self.train_path、self.val_path这些参数使其指向数据集)。一个示例：
+```
+D://GitHub
+     |------COCO
+     |        |------annotations
+     |        |------test2017
+     |        |------train2017
+     |        |------val2017
+     |
+     |------Paddle-SOLOv2-master
+              |------config
+              |------data
+              |------model
+              |------tools
+              |------...
+```
+
+
 ## 训练
 
 以复现solov2_light_r50_vd_fpn_dcn_512_3x.pdparams在COCO上的精度为例。

@@ -20,34 +20,13 @@ import paddle
 from config import *
 from model.decode_np import Decode
 from model.solo import *
+from tools.argparser import ArgParser
 from tools.cocotools import get_classes
 
 import logging
 FORMAT = '%(asctime)s-%(levelname)s: %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
-
-parser = argparse.ArgumentParser(description='Infer Script', formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('--use_gpu', type=bool, default=True, help='whether to use gpu. True or False')
-parser.add_argument('-c', '--config', type=int, default=2,
-                    choices=[0, 1, 2],
-                    help=textwrap.dedent('''\
-                    select one of these config files:
-                    0 -- solov2_r50_fpn_8gpu_3x.py
-                    1 -- solov2_light_448_r50_fpn_8gpu_3x.py
-                    2 -- solov2_light_r50_vd_fpn_dcn_512_3x.py'''))
-args = parser.parse_args()
-config_file = args.config
-use_gpu = args.use_gpu
-
-
-print(paddle.__version__)
-paddle.disable_static()
-# 开启动态图
-
-gpu_id = int(os.environ.get('FLAGS_selected_gpus', 0))
-place = paddle.CUDAPlace(gpu_id) if use_gpu else paddle.CPUPlace()
-
 
 
 def read_test_data(path_dir,
@@ -74,14 +53,13 @@ def save_img(filename, image):
     cv2.imwrite('images/res/' + filename, image)
 
 if __name__ == '__main__':
-    cfg = None
-    if config_file == 0:
-        cfg = SOLOv2_r50_fpn_8gpu_3x_Config()
-    elif config_file == 1:
-        cfg = SOLOv2_light_448_r50_fpn_8gpu_3x_Config()
-    elif config_file == 2:
-        cfg = SOLOv2_light_r50_vd_fpn_dcn_512_3x_Config()
-
+    parser = ArgParser()
+    use_gpu = parser.get_use_gpu()
+    cfg = parser.get_cfg()
+    print(paddle.__version__)
+    paddle.disable_static()   # 开启动态图
+    gpu_id = int(os.environ.get('FLAGS_selected_gpus', 0))
+    place = paddle.CUDAPlace(gpu_id) if use_gpu else paddle.CPUPlace()
 
     # 读取的模型
     model_path = cfg.test_cfg['model_path']

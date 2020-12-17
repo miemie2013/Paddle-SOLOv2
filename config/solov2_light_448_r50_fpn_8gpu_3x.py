@@ -45,6 +45,8 @@ class SOLOv2_light_448_r50_fpn_8gpu_3x_Config(object):
             save_iter=1000,   # 每隔几步保存一次模型
             eval_iter=30000,   # 每隔几步计算一次eval集的mAP
             max_iters=270000,   # 训练多少步
+            mixup_epoch=10,     # 前几轮进行mixup
+            cutmix_epoch=-1,    # 前几轮进行cutmix
         )
         self.learningRate = dict(
             base_lr=0.01,
@@ -159,6 +161,7 @@ class SOLOv2_light_448_r50_fpn_8gpu_3x_Config(object):
         self.decodeImage = dict(
             to_rgb=True,
             with_mixup=False,
+            with_cutmix=False,
         )
         # Poly2Mask
         self.poly2Mask = dict(

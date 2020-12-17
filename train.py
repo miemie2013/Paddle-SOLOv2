@@ -21,6 +21,7 @@ from config import *
 from model.EMA import ExponentialMovingAverage
 
 from model.solo import *
+from tools.argparser import ArgParser
 from tools.cocotools import get_classes, catid2clsid, clsid2catid
 from model.decode_np import Decode
 from tools.cocotools import eval
@@ -33,27 +34,6 @@ import logging
 FORMAT = '%(asctime)s-%(levelname)s: %(message)s'
 logging.basicConfig(level=logging.INFO, format=FORMAT)
 logger = logging.getLogger(__name__)
-
-parser = argparse.ArgumentParser(description='Training Script', formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('--use_gpu', type=bool, default=True, help='whether to use gpu. True or False')
-parser.add_argument('-c', '--config', type=int, default=2,
-                    choices=[0, 1, 2],
-                    help=textwrap.dedent('''\
-                    select one of these config files:
-                    0 -- solov2_r50_fpn_8gpu_3x.py
-                    1 -- solov2_light_448_r50_fpn_8gpu_3x.py
-                    2 -- solov2_light_r50_vd_fpn_dcn_512_3x.py'''))
-args = parser.parse_args()
-config_file = args.config
-use_gpu = args.use_gpu
-
-
-print(paddle.__version__)
-paddle.disable_static()
-# 开启动态图
-
-gpu_id = int(os.environ.get('FLAGS_selected_gpus', 0))
-place = paddle.CUDAPlace(gpu_id) if use_gpu else paddle.CPUPlace()
 
 
 def multi_thread_op(i, num_threads, batch_size, samples, context, with_mixup, sample_transforms):
@@ -221,13 +201,13 @@ def calc_lr(iter_id, cfg):
 
 
 if __name__ == '__main__':
-    cfg = None
-    if config_file == 0:
-        cfg = SOLOv2_r50_fpn_8gpu_3x_Config()
-    elif config_file == 1:
-        cfg = SOLOv2_light_448_r50_fpn_8gpu_3x_Config()
-    elif config_file == 2:
-        cfg = SOLOv2_light_r50_vd_fpn_dcn_512_3x_Config()
+    parser = ArgParser()
+    use_gpu = parser.get_use_gpu()
+    cfg = parser.get_cfg()
+    print(paddle.__version__)
+    paddle.disable_static()   # 开启动态图
+    gpu_id = int(os.environ.get('FLAGS_selected_gpus', 0))
+    place = paddle.CUDAPlace(gpu_id) if use_gpu else paddle.CPUPlace()
 
     # 打印，确认一下使用的配置
     print('\n=============== config message ===============')
@@ -338,6 +318,9 @@ if __name__ == '__main__':
 
     batch_size = cfg.train_cfg['batch_size']
     with_mixup = cfg.decodeImage['with_mixup']
+    with_cutmix = cfg.decodeImage['with_cutmix']
+    mixup_epoch = cfg.train_cfg['mixup_epoch']
+    cutmix_epoch = cfg.train_cfg['cutmix_epoch']
     context = cfg.context
     # 预处理
     # sample_transforms
@@ -369,6 +352,13 @@ if __name__ == '__main__':
             preprocess = Gt2Solov2Target(**cfg.gt2Solov2Target)   # 填写target张量。
         batch_transforms.append(preprocess)
 
+    print('\n=============== sample_transforms ===============')
+    for trf in sample_transforms:
+        print('%s' % str(type(trf)))
+    print('\n=============== batch_transforms ===============')
+    for trf in batch_transforms:
+        print('%s' % str(type(trf)))
+
     # 保存模型的目录
     if not os.path.exists('./weights'): os.mkdir('./weights')
 
@@ -378,6 +368,18 @@ if __name__ == '__main__':
 
     # 一轮的步数。丢弃最后几个样本。
     train_steps = num_train // batch_size
+    mixup_steps = mixup_epoch * train_steps
+    cutmix_steps = cutmix_epoch * train_steps
+    print('\n=============== mixup and cutmix ===============')
+    print('steps_per_epoch: %d' % train_steps)
+    if with_mixup:
+        print('mixup_steps: %d' % mixup_steps)
+    else:
+        print('don\'t use mixup.')
+    if with_cutmix:
+        print('cutmix_steps: %d' % cutmix_steps)
+    else:
+        print('don\'t use cutmix.')
 
     # 读数据的线程
     train_dic ={}
@@ -395,6 +397,8 @@ if __name__ == '__main__':
 
 
     best_ap_list = [0.0, 0]  #[map, iter]
+    train_speed_count = 0
+    train_speed_start = 0.0
     while True:   # 无限个epoch
         for step in range(train_steps):
             iter_id += 1
@@ -428,13 +432,13 @@ if __name__ == '__main__':
                 grid_orders[idx] = dic['grid_order%d'%idx]
 
             losses = model.train_model(images, ins_labels, cate_labels, grid_orders, fg_nums)
-            loss_ins = losses['loss_ins']
-            loss_cate = losses['loss_cate']
-            all_loss = loss_ins + loss_cate
-
+            all_loss = 0.0
+            loss_names = {}
+            for loss_name in losses.keys():
+                sub_loss = losses[loss_name]
+                all_loss += sub_loss
+                loss_names[loss_name] = sub_loss.numpy()[0]
             _all_loss = all_loss.numpy()[0]
-            _loss_ins = loss_ins.numpy()[0]
-            _loss_cate = loss_cate.numpy()[0]
 
             # 更新权重
             lr = calc_lr(iter_id, cfg)
@@ -448,9 +452,29 @@ if __name__ == '__main__':
             # ==================== log ====================
             if iter_id % 20 == 0:
                 lr = optimizer.get_lr()
-                strs = 'Train iter: {}, lr: {:.9f}, all_loss: {:.6f}, loss_ins: {:.6f}, loss_cate: {:.6f}, eta: {}'.format(
-                    iter_id, lr, _all_loss, _loss_ins, _loss_cate, eta)
+                each_loss = ''
+                for loss_name in loss_names.keys():
+                    loss_value = loss_names[loss_name]
+                    each_loss += ' %s: %.3f,' % (loss_name, loss_value)
+                strs = 'Train iter: {}, lr: {:.9f}, all_loss: {:.3f},{} eta: {}'.format(iter_id, lr, _all_loss, each_loss, eta)
                 logger.info(strs)
+
+            # ==================== train_speed ====================
+            mod_iter_id = iter_id % 1000
+            step_iter = 200   # 每隔200步计算一下训练速度。
+            if mod_iter_id >= 20:   # 前20步热身。
+                if mod_iter_id == 20:
+                    train_speed_count = 0
+                    train_speed_start = time.time()
+                elif mod_iter_id > 825:
+                    pass
+                else:
+                    train_speed_count += 1
+                    if train_speed_count % step_iter == 0:
+                        sts = train_speed_count // step_iter
+                        sts *= step_iter
+                        cost = time.time() - train_speed_start
+                        logger.info('Train Speed: %.3f steps per second.' % ((sts / cost), ))
 
             # ==================== save ====================
             if iter_id % cfg.train_cfg['save_iter'] == 0:
